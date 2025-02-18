@@ -32,21 +32,30 @@ def generate_chat_response(chat_completion) -> Generator[str, None, None]:
 if "messages" not in st.session_state:
     st.session_state.messages = []   
 
-# Muestra mensaje de chat desde la historia en la aplicacion cada vez que la aplicacion se ejecuta
+# Mostramos la lista de modelos en el sidebar
+parModelo = st.sidebar.selectbox('Modelos', options=modelos, index=0)
+
+# Detectar cambio de modelo y agregar mensaje de sistema al historial
+if "prev_model" not in st.session_state:
+    st.session_state.prev_model = parModelo
+elif parModelo != st.session_state.prev_model:
+    change_message = f"Modelo cambiado: se está usando ahora {parModelo}"
+    st.session_state.messages.append({"role": "system", "content": change_message})
+    st.session_state.prev_model = parModelo
+
+# Muestra mensaje de chat desde la historia en la aplicación cada vez que la aplicación se ejecuta
 with st.container():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            # Si el mensaje del asistente viene como diccionario, mostramos expander y respuesta final
             if message["role"] == "assistant" and isinstance(message["content"], dict):
                 if message["content"].get("thinking"):
                     with st.expander("Mostrar pensamiento"):
                         st.write(message["content"]["thinking"])
                 st.markdown(message["content"]["final"])
+            elif message["role"] == "system":
+                st.info(message["content"])
             else:
                 st.markdown(message["content"])
-            
-# Mostramos la lista de modelos en el sidebar
-parModelo = st.sidebar.selectbox('Modelos', options=modelos, index=0)
 
 # Mostramos el campo para el promt
 prompt = st.chat_input("Escribe un mensaje...")
