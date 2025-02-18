@@ -2,7 +2,10 @@ import streamlit as st
 import time
 from groq import Groq
 from typing import Generator
+from PIL import Image
 
+logo_img = Image.open("logo/groq.png")
+st.set_page_config(page_title='Groq LLM', page_icon=logo_img)
 
 # Declaramos la api de Groq
 client = Groq(
